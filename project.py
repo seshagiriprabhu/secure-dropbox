@@ -41,7 +41,7 @@ class Dropbox(cmd.Cmd):
         cmd.Cmd.__init__(self)
 
         # If number of arguments is less than 4
-        if len(sys.argv) < 4:
+        if len(sys.argv) < 3:
             self.do_help()
         #    sys.exit(0)
 
@@ -77,11 +77,11 @@ class Dropbox(cmd.Cmd):
         self.do_account_info(api_client)
         
         if (sys.argv[1] == 'put'):
-            self.do_put(sys.argv[2], sys.argv[3])
+            self.do_put(sys.argv[2])
         elif (sys.argv[1] == 'get'):
-            self.do_get(sys.argv[2], sys.argv[3])
+            self.do_get(sys.argv[2])
         else:
-            print "Invalid input" + sys.argv[1]
+            print "Invalid argument[1]"
 
     # Function prints the account information
     def do_account_info(self, api_client):
@@ -89,7 +89,7 @@ class Dropbox(cmd.Cmd):
         pprint.PrettyPrinter(indent=2).pprint(f)
 
     # A function to download files from dropbox account
-    def do_get(self, from_path, to_path):
+    def do_get(self, from_path):
         """
         Copy file from Dropbox to local file and print out out the metadata.
 
@@ -105,7 +105,7 @@ class Dropbox(cmd.Cmd):
             sys.exit(0)
 
     # A function to upload files into dropbox account
-    def do_put(self, from_path, to_path):
+    def do_put(self, from_path):
         """
         Copy local file to Dropbox
 
