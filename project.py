@@ -79,7 +79,7 @@ class Dropbox(cmd.Cmd):
         if (sys.argv[1] == 'put'):
             self.do_put(sys.argv[2], sys.argv[3])
         elif (sys.argv[1] == 'get'):
-            self.do_get(sys.argv[2], sys.argv[4])
+            self.do_get(sys.argv[2], sys.argv[3])
         else:
             print "Invalid argument[1]"
 
@@ -96,13 +96,13 @@ class Dropbox(cmd.Cmd):
         Example:
         $ python project.py get dropbox-file.txt.enc /home/$USER/file.txt
         """
-        # Sanitization checking
-        if os.path.isfile(from_path):
-            print "File exist"
+        to_file = open(os.path.expanduser(to_path), "wb")
 
-        else:
-            print "Give a valid input file"
-            sys.exit(0)
+        f, metadata = self.api_client.get_file_and_metadata(from_path)
+        print 'Metadata:', metadata
+        to_file.write(f.read())
+        self.do_decrypt_file(KEY, from_path) 
+            
 
     # A function to upload files into dropbox account
     def do_put(self, from_path, to_path=None):
@@ -118,10 +118,15 @@ class Dropbox(cmd.Cmd):
             out_filename = from_path + '.enc'
 
             if not to_path:
-                to_path = '~/'
+                to_path = '~/' + out_filename
 
             from_file = open(os.path.expanduser(out_filename), "rb")
-            self.api_client.put_file(self.current_path + "/" + to_path, from_file)
+            self.api_client.put_file(to_path, from_file)
+                       
+            # Cleans up the .enc files
+            os.remove(out_filename)
+            
+            print "File Successfully Uploaded!"
 
         else:
             print "Give a valid input file"
