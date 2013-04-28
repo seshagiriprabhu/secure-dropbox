@@ -38,7 +38,12 @@ ACCESS_TYPE = 'dropbox' # should be 'dropbox' or 'app_folder' as configured for 
 class Dropbox(cmd.Cmd):
     def __init__ (self):
         cmd.Cmd.__init__(self)
-    
+        
+        # If number of arguments is less than 4
+        if len(sys.argv) < 4:
+            self.do_help()
+            sys.exit(0)
+
         # If the TOKEN file exist
         if os.path.isfile(TOKENS):
             token_file = open(TOKENS)
@@ -66,7 +71,7 @@ class Dropbox(cmd.Cmd):
             token_file.write("%s|%s" % (access_token.key,access_token.secret) )
             token_file.close()
 
-        print "Successfully authenticated!"
+        print "Successfully authenticated!\nRetrieving user information from server\n"
         api_client = client.DropboxClient(sess)
         self.do_account_info(api_client)
         
@@ -99,8 +104,6 @@ class Dropbox(cmd.Cmd):
 
 def main():
     drop = Dropbox()
-    if (len(sys.argv) < 4):
-        drop.do_help()
 
 
 if __name__ == '__main__':
