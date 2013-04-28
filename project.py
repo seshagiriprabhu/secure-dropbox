@@ -19,6 +19,7 @@ import os
 import pprint
 import shlex
 import sys
+import re
 
 # Include the Dropbox SDK libraries
 from dropbox import client, rest, session
@@ -38,11 +39,11 @@ ACCESS_TYPE = 'dropbox' # should be 'dropbox' or 'app_folder' as configured for 
 class Dropbox(cmd.Cmd):
     def __init__ (self):
         cmd.Cmd.__init__(self)
-        
+
         # If number of arguments is less than 4
         if len(sys.argv) < 4:
             self.do_help()
-            sys.exit(0)
+        #    sys.exit(0)
 
         # If the TOKEN file exist
         if os.path.isfile(TOKENS):
@@ -75,11 +76,19 @@ class Dropbox(cmd.Cmd):
         api_client = client.DropboxClient(sess)
         self.do_account_info(api_client)
         
-    # Prints the account information
+        if (sys.argv[1] == 'put'):
+            self.do_put(sys.argv[2], sys.argv[3])
+        elif (sys.argv[1] == 'get'):
+            self.do_get(sys.argv[2], sys.argv[3])
+        else:
+            print "Invalid input" + sys.argv[1]
+
+    # Function prints the account information
     def do_account_info(self, api_client):
         f = api_client.account_info()
         pprint.PrettyPrinter(indent=2).pprint(f)
 
+    # A function to download files from dropbox account
     def do_get(self, from_path, to_path):
         """
         Copy file from Dropbox to local file and print out out the metadata.
@@ -87,6 +96,8 @@ class Dropbox(cmd.Cmd):
         Example:
         $ python project.py get dropbox-file.txt /home/$USER/file.txt
         """
+
+    # A function to upload files into dropbox account
     def do_put(self, from_path, to_path):
         """
         Copy local file to Dropbox
@@ -94,11 +105,10 @@ class Dropbox(cmd.Cmd):
         Example:
         $ python project.py put /home/$USER/file.txt dropbox-file.txt
         """
-
-
+    
+    # Function prints the help text from the 'help' file
     def do_help(self):
         f = open (HELP, 'r')
-#        f.readline()
         for line in f:
             sys.stdout.write(line)
 
