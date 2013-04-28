@@ -97,13 +97,17 @@ class Dropbox(cmd.Cmd):
         $ python project.py get dropbox-file.txt.enc /home/$USER/file.txt
         """
         to_file = open(os.path.expanduser(to_path), "wb")
-
         f, metadata = self.api_client.get_file_and_metadata(from_path)
+
         print 'Metadata:', metadata
         to_file.write(f.read())
-        self.do_decrypt_file(KEY, from_path) 
-            
+        print "Successfully downloaded the encrypted file"
 
+        os.rename (to_path, to_path + '.enc')
+        to_path_enc = to_path + '.enc'
+
+        self.do_decrypt_file(KEY, to_path_enc, to_path) 
+    
     # A function to upload files into dropbox account
     def do_put(self, from_path, to_path=None):
         """
@@ -115,6 +119,7 @@ class Dropbox(cmd.Cmd):
         # Sanitization checking
         if os.path.isfile(from_path):
             self.do_encrypt_file(KEY, from_path)
+            print "Local file encryption was successfull"
             out_filename = from_path + '.enc'
 
             if not to_path:
@@ -126,7 +131,7 @@ class Dropbox(cmd.Cmd):
             # Cleans up the .enc files
             os.remove(out_filename)
             
-            print "File Successfully Uploaded!"
+            print "Encrypted File Successfully Uploaded!"
 
         else:
             print "Give a valid input file"
