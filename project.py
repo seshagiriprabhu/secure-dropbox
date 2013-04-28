@@ -94,8 +94,15 @@ class Dropbox(cmd.Cmd):
         Copy file from Dropbox to local file and print out out the metadata.
 
         Example:
-        $ python project.py get dropbox-file.txt /home/$USER/file.txt
+        $ python project.py get dropbox-file.txt.enc /home/$USER/file.txt
         """
+        # Sanitization checking
+        if os.path.isfile(from_path):
+            print "File exist"
+
+        else:
+            print "Give a valid input file"
+            sys.exit(0)
 
     # A function to upload files into dropbox account
     def do_put(self, from_path, to_path):
@@ -105,6 +112,13 @@ class Dropbox(cmd.Cmd):
         Example:
         $ python project.py put /home/$USER/file.txt dropbox-file.txt
         """
+        # Sanitization checking
+        if os.path.isfile(from_path):
+            print "File exist"
+
+        else:
+            print "Give a valid input file"
+            sys.exit(0)
     
     # Function prints the help text from the 'help' file
     def do_help(self):
