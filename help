@@ -24,12 +24,12 @@ Put
 Copy local file to Dropbox
 
 Example:
-$ python project.py put /home/$USER/file.txt dropbox-file.txt
+$ python project.py put /home/$USER/file.txt dropbox-file.enc
 
 Get
 ===
 Copy file from Dropbox to local file and print out out the metadata.
 
 Example:
-$ python project.py get dropbox-file.txt /home/$USER/file.txt
+$ python project.py get dropbox-file.enc /home/$USER/file.txt
 
