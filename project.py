@@ -31,6 +31,8 @@ HELP = 'help'
 # You can find these values at http://www.dropbox.com/developers/apps
 APP_KEY = 'gy60gre2uauivp2'
 APP_SECRET = '3yvf1vsyj5y7pvo'
+
+# This key is used to encrypt and decrypt the data
 KEY = "rU4Debxe2zKqSxNrUSUUk9AS"
 
 ACCESS_TYPE = 'dropbox' # should be 'dropbox' or 'app_folder' as configured for your app
@@ -72,7 +74,7 @@ class Dropbox(cmd.Cmd):
             token_file.write("%s|%s" % (access_token.key,access_token.secret) )
             token_file.close()
 
-        print "Successfully authenticated!\nRetrieving user information from server\n"
+        print "Successfully authenticated!\n"
         self.api_client = client.DropboxClient(sess)
         #self.do_account_info(api_client)
         
@@ -89,24 +91,22 @@ class Dropbox(cmd.Cmd):
         pprint.PrettyPrinter(indent=2).pprint(f)
 
     # A function to download files from dropbox account
-    def do_get(self, from_path, to_path=None):
+    def do_get(self, from_path, to_path):
         """
         Copy file from Dropbox to local file and print out out the metadata.
 
         Example:
         $ python project.py get dropbox-file.txt.enc /home/$USER/file.txt
         """
-        to_file = open(os.path.expanduser(to_path), "wb")
+        to_file = open(os.path.expanduser(from_path), "wb")
         f, metadata = self.api_client.get_file_and_metadata(from_path)
 
         print 'Metadata:', metadata
         to_file.write(f.read())
         print "Successfully downloaded the encrypted file"
 
-        os.rename (to_path, to_path + '.enc')
-        to_path_enc = to_path + '.enc'
-
-        self.do_decrypt_file(KEY, to_path_enc, to_path) 
+        self.do_decrypt_file(KEY, from_path, to_path) 
+        print "Successfully decrypted the downloaded file"
     
     # A function to upload files into dropbox account
     def do_put(self, from_path, to_path=None):
@@ -143,7 +143,7 @@ class Dropbox(cmd.Cmd):
         for line in f:
             sys.stdout.write(line)
 
-    def do_encrypt_file(self, key, in_filename, out_filename=None, chunksize=64*1024):
+    def do_encrypt_file(self, key, in_filename, out_filename, chunksize=64*1024):
         """ Encrypts a file using AES (CBC mode) with the
             given key.
 
@@ -164,9 +164,6 @@ class Dropbox(cmd.Cmd):
                 sizes can be faster for some files and machines.
                 chunksize must be divisible by 16.
         """
-        if not out_filename:
-            out_filename = in_filename + '.enc'
-
         iv = ''.join(chr(random.randint(0, 0xFF)) for i in range(16))
         encryptor = AES.new(key, AES.MODE_CBC, iv)
         filesize = os.path.getsize(in_filename)
@@ -186,7 +183,7 @@ class Dropbox(cmd.Cmd):
                     outfile.write(encryptor.encrypt(chunk))
               
 
-    def do_decrypt_file(self, key, in_filename, out_filename=None, chunksize=24*1024):
+    def do_decrypt_file(self, key, in_filename, out_filename, chunksize=24*1024):
         """ Decrypts a file using AES (CBC mode) with the
             given key. Parameters are similar to encrypt_file,
             with one difference: out_filename, if not supplied
@@ -194,9 +191,6 @@ class Dropbox(cmd.Cmd):
             (i.e. if in_filename is 'aaa.zip.enc' then
             out_filename will be 'aaa.zip')
         """
-        if not out_filename:
-            out_filename = os.path.splitext(in_filename)[0]
-
         with open(in_filename, 'rb') as infile:
             origsize = struct.unpack('<Q', infile.read(struct.calcsize('Q')))[0]
             iv = infile.read(16)
@@ -208,9 +202,8 @@ class Dropbox(cmd.Cmd):
                     if len(chunk) == 0:
                         break
                     outfile.write(decryptor.decrypt(chunk))
-
                 outfile.truncate(origsize)
-            
+
 def main():
     drop = Dropbox()
 
